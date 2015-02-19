@@ -155,7 +155,7 @@
 					var col = active.parent("td").index() + 1;
 					
 					// If it's been selected out of order, update to set the current box
-					if (active[0] != last_score[0]) {
+					if (active[0] != last_score[0] && (active.hasClass('score_2') || score == "X")) {
 						last_score.addClass('active');
 						row.removeClass('current');
 						last_score.closest('tr').addClass('current');
@@ -166,7 +166,7 @@
 					} else if (active.hasClass('score_2') || active.hasClass('score_3') || (score == "X" && col < 11)) {
 						// If it's a strike, blank out the second score
 						if (score == "X" && col < 11) {
-							$(".score_2", active.parent()).html("&nbsp;");
+							$(".score_2 span", active.parent()).html("&nbsp;");
 						}
 						
 						// If it's the last player
@@ -229,26 +229,31 @@
 							
 							// Get next score
 							var next = nextScore($(".score_1", this));
-							
+							console.log(next);
 							if (next) {
 								var tempscore = next.text();
 								
 								// If another strike or a spare, add 10, otherwise parse number
 								if (tempscore == "X" || tempscore == "/") tempscore = 10;
+								else if (tempscore == "-" || tempscore == "\u2013") tempscore = 0;
 								else tempscore = parseInt(tempscore);
 								
 								// Update score and get next
 								score1 += tempscore;
 								next = nextScore(next);
 								
+								console.log(next);
 								if (next) {
 									// If another strike or a spare, add 10, otherwise parse number
 									if (tempscore == "X" || tempscore == "/") tempscore = 10;
+									else if (tempscore == "-" || tempscore == "\u2013") tempscore = 0;
 									else tempscore = parseInt(tempscore);
 									
 									score1 += tempscore;
 								}
 							}
+						} else if (score1 == "-" || score1 == "\u2013") {
+							score1 = 0;
 						} else {
 							// Otherwise, parse number
 							score1 = parseInt(score1);
@@ -270,12 +275,13 @@
 								
 								// If a strike or spare, add 10, otherwise parse number
 								if (tempscore == "X" || tempscore == "/") tempscore = 10;
+								else if (tempscore == "-" || tempscore == "\u2013") tempscore = 0;
 								else tempscore = parseInt(tempscore);
 								
 								score2 += tempscore;
 							}
-						} else if (score2 == "" || score2 == " " || score2 == "&nbsp;" || score2 == '\xa0') {
-							// If it's empty due to a strike
+						} else if (score2 == "" || score2 == " " || score2 == "&nbsp;" || score2 == '\xa0' || score2 == "X" || score2 == "-" || score2 == "\u2013") {
+							// If it's empty due to a strike, or a strike in the last frame
 							score2 = 0;
 						} else {
 							// Otherwise, parse number
