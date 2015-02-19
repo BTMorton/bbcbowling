@@ -194,6 +194,8 @@
 					
 					// Update the scores
 					calcScore();
+					// Update the buttons
+					updateButtons();
 				});
 				
 				// When clicking a box, it should become selected
@@ -211,6 +213,7 @@
 				
 				// Initialise the score box 'counter'
 				last_score = $(".active");
+				updateButtons();
 			});
 			
 			// Function to update player scores
@@ -220,16 +223,17 @@
 					var score = 0;
 					
 					// For each frame
-					$("td.score", this).each(function() {
-						var score1 = $(".score_1", this).text();
+					for (var x = 0; x < 10; x++) {
+						var col = $(".col_"+x, this);
+						var score1 = $(".score_1", col).text();
 						
 						// If they got a strike, value is 10 + next + next
 						if (score1 == "X") {
 							score1 = 10;
 							
 							// Get next score
-							var next = nextScore($(".score_1", this));
-							console.log(next);
+							var next = nextScore($(".score_1", col));
+							
 							if (next) {
 								var tempscore = next.text();
 								
@@ -242,8 +246,9 @@
 								score1 += tempscore;
 								next = nextScore(next);
 								
-								console.log(next);
 								if (next) {
+									tempscore = next.text();
+									
 									// If another strike or a spare, add 10, otherwise parse number
 									if (tempscore == "X" || tempscore == "/") tempscore = 10;
 									else if (tempscore == "-" || tempscore == "\u2013") tempscore = 0;
@@ -261,14 +266,14 @@
 						
 						score += score1;
 						
-						var score2 = $(".score_2", this).text();
+						var score2 = $(".score_2", col).text();
 						
 						// If they got a spare, value is 10 + next
 						if (score2 == "/") {
-							score2 = 10;
+							score2 = 10 - score1;
 							
 							// Get next score
-							var next = nextScore($(".score_1", this));
+							var next = nextScore($(".score_2", col));
 							
 							if (next) {
 								var tempscore = next.text();
@@ -291,8 +296,8 @@
 						score += score2;
 						
 						// Display current score total
-						$(".score_tot span", this).text(score);
-					});
+						$(".score_tot span", col).text(score);
+					}
 				});
 			}
 			
@@ -345,6 +350,47 @@
 				// Append to table
 				$("tbody").append(clone);
 			}
+			
+			function updateButtons() {
+				$(".btn").removeClass("disabled");
+				
+				var active = $(".active");
+				
+				if (active.hasClass('score_1')) {
+					$("#btn_S").addClass("disabled");
+				} else if (active.hasClass('score_2')) {
+					console.log(active.parent().index());
+					if (active.parent().index() != 10) {
+						$("#btn_X").addClass("disabled");
+					}
+					
+					var score = $(".score_1", active.parent()).text();
+					if (score == "X" || score == "/") {
+						$("#btn_S").addClass("disabled");
+					} else {
+						if (score == "\u2013") score = 0;
+						if (score == "\xa0") score = 0;
+						if (score == "") score = 0;
+						
+						for (var x = 9; x > (9 - score); x--) {
+							$("#btn_"+x).addClass("disabled");
+						}
+					}
+				} else {
+					var score = $(".score_2", active.parent()).text();
+					if (score == "X" || score == "/") {
+						$("#btn_S").addClass('disabled');
+					} else {
+						$("#btn_X").addClass('disabled');
+						
+						if (score != "/") {
+							for (var x = 9; x > (9 - score); x--) {
+								$("#btn_"+x).addClass("disabled");
+							}
+						}
+					}
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -394,18 +440,18 @@
 			<tfoot>
 				<tr>
 					<td colspan="11" class="text-center">
-						<div class="btn btn-primary btn-lg">&ndash;</div>
-						<div class="btn btn-primary btn-lg">1</div>
-						<div class="btn btn-primary btn-lg">2</div>
-						<div class="btn btn-primary btn-lg">3</div>
-						<div class="btn btn-primary btn-lg">4</div>
-						<div class="btn btn-primary btn-lg">5</div>
-						<div class="btn btn-primary btn-lg">6</div>
-						<div class="btn btn-primary btn-lg">7</div>
-						<div class="btn btn-primary btn-lg">8</div>
-						<div class="btn btn-primary btn-lg">9</div>
-						<div class="btn btn-primary btn-lg">/</div>
-						<div class="btn btn-primary btn-lg">X</div>
+						<div class="btn btn-primary btn-lg" id="btn_D">&ndash;</div>
+						<div class="btn btn-primary btn-lg" id="btn_1">1</div>
+						<div class="btn btn-primary btn-lg" id="btn_2">2</div>
+						<div class="btn btn-primary btn-lg" id="btn_3">3</div>
+						<div class="btn btn-primary btn-lg" id="btn_4">4</div>
+						<div class="btn btn-primary btn-lg" id="btn_5">5</div>
+						<div class="btn btn-primary btn-lg" id="btn_6">6</div>
+						<div class="btn btn-primary btn-lg" id="btn_7">7</div>
+						<div class="btn btn-primary btn-lg" id="btn_8">8</div>
+						<div class="btn btn-primary btn-lg" id="btn_9">9</div>
+						<div class="btn btn-primary btn-lg" id="btn_S">/</div>
+						<div class="btn btn-primary btn-lg" id="btn_X">X</div>
 						<div class="btn btn-primary btn-lg" id="add_player">Add Player</div>
 					</td>
 				</tr>
