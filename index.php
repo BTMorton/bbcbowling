@@ -3,8 +3,8 @@
 	<head>
 		<!-- Latest compiled and minified CSS -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-		<!-- Optional theme -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 		<!-- Latest compiled and minified JavaScript -->
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
@@ -41,12 +41,6 @@
 			}
 			thead tr td:first-of-type {
 				padding: 0;
-			}
-			tbody tr td:not(:first-of-type):not(:last-of-type) {
-				width: 2%;
-			}
-			tbody tr td:last-of-type {
-				width: 3%;
 			}
 			tr td .left_corner, tr td .right_corner {
 				position: absolute;
@@ -86,22 +80,6 @@
 				overflow: hidden;
 				text-overflow: ellipsis;
 			}
-			tr.current, tr.current td {
-				height: 15%;
-				background-color: #337ab7;
-				color: #FFFFFF;
-				text-shadow: 0 -1px 0 rgba(0,0,0,.2);
-				-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-				box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-				background-image: -webkit-linear-gradient(top,#337ab7 0,#265a88 100%);
-				background-image: -o-linear-gradient(top,#337ab7 0,#265a88 100%);
-				background-image: -webkit-gradient(linear,left top,left bottom,from(#337ab7),to(#265a88));
-				background-image: linear-gradient(to bottom,#337ab7 0,#265a88 100%);
-				filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff265a88', GradientType=0);
-				filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-				background-repeat: repeat-x;
-				border-color: #245580;
-			}
 			.table > tbody > tr > td.score {
 				padding: 0;
 			}
@@ -137,11 +115,61 @@
 				clear: both;
 				width: 100%;
 			}
-			.score .active {
-				border: 3px solid #337AB7;
+			
+			@media screen {
+				tr.current, tr.current td {
+					height: 15%;
+					background-color: #337ab7;
+					color: #FFFFFF;
+					text-shadow: 0 -1px 0 rgba(0,0,0,.2);
+					-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
+					box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
+					background-image: -webkit-linear-gradient(top,#337ab7 0,#265a88 100%);
+					background-image: -o-linear-gradient(top,#337ab7 0,#265a88 100%);
+					background-image: -webkit-gradient(linear,left top,left bottom,from(#337ab7),to(#265a88));
+					background-image: linear-gradient(to bottom,#337ab7 0,#265a88 100%);
+					filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff265a88', GradientType=0);
+					filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+					background-repeat: repeat-x;
+					border-color: #245580;
+				}
+				.score .active {
+					border: 3px solid #DDD;
+				}
 			}
-			tfoot td .btn:not(#add_player) {
+			
+			tfoot td .btn:not(#add_player):not(#print) {
 				width: 46px;
+			}
+			
+			@media print {
+				@page {
+					size: landscape;
+				}
+				thead td div {
+					display: none;
+				}
+				tfoot, #buttons {
+					display: none;
+				}
+				tr td:first-of-type {
+					width: 150px !important;
+				}
+				tr td {
+					width: 50px !important;
+				}
+				table.table {
+					border-collapse: collapse;
+				}
+				table.table tr td, table.table tr th, table.table {
+					border: 1px solid black !important;
+				}
+				.score div {
+					border-color: #000000 !important;
+				}
+				body {
+					color: #000 !important;
+				}
 			}
 		</style>
 		<script type="text/javascript">
@@ -152,10 +180,14 @@
 			$(function() {
 				// Add player button functionality
 				$("#add_player").click(function() {
+					first = false;
+					
 					// Maximum of 6 players
 					if ($("tbody tr").length >= 6) {
 						return false;
 					}
+					
+					// Show the modal box
 					$(".modal input").val("");
 					$(".modal").modal('show');
 				});
@@ -188,7 +220,7 @@
 				})
 				
 				// Score button functionality
-				$("#buttons .btn:not(#add_player)").click(function() {
+				$("#buttons .btn:not(#add_player):not(#print)").click(function() {
 					// Get the current score from the button and update the box
 					var score = $(this).text();
 					$(".current .score .active span").text(score);
@@ -266,6 +298,10 @@
 				// Bootstrap modal autofocus
 				$(".modal").on("shown.bs.modal", function() {
 					$(".modal input").focus();
+				});
+				
+				$("#print").click(function() {
+					window.print();
 				});
 				
 				// Initialise the score box 'counter'
@@ -536,6 +572,7 @@
 						<div class="btn btn-primary btn-lg" id="btn_S">/</div>
 						<div class="btn btn-primary btn-lg" id="btn_X">X</div>
 						<div class="btn btn-primary btn-lg" id="add_player">Add Player</div>
+						<div class="btn btn-primary btn-lg" id="print"><i class="fa fa-print"></i></div>
 					</td>
 				</tr>
 			</tfoot>
