@@ -16,6 +16,7 @@
 			table.table {
 				height: 100%;
 				margin: 0;
+				table-layout: fixed;
 			}
 			thead tr, tfoot tr, thead tr td, tfoot tr td {
 				height: 75px;
@@ -31,6 +32,21 @@
 			:not(tfoot) > tr td:first-of-type {
 				position: relative;
 				width: 300px;
+				max-width: 300px;
+				min-width: 300px;
+			}
+			thead tr td:first-of-type div {
+				width: 300px;
+				height: 75px;
+			}
+			thead tr td:first-of-type {
+				padding: 0;
+			}
+			tbody tr td:not(:first-of-type):not(:last-of-type) {
+				width: 2%;
+			}
+			tbody tr td:last-of-type {
+				width: 3%;
 			}
 			tr td .left_corner, tr td .right_corner {
 				position: absolute;
@@ -206,12 +222,13 @@
 					active.removeClass("active");
 					if (active[0] == last_score[0]) last_score = $(".active");
 					
-					$("#add_player").addClass('disabled');
 					
 					// Update the scores
 					calcScore();
 					// Update the buttons
 					updateButtons();
+					// We don't want to add any more players once play has begun
+					$("#add_player").addClass('disabled');
 				});
 				
 				// When clicking a box, it should become selected
@@ -386,9 +403,10 @@
 				}
 			}
 			
+			// Function to update the available score buttons
 			function updateButtons() {
 				// Enable all buttons to start
-				$("#buttons .btn:not(#add_button)").removeClass("disabled");
+				$("#buttons .btn:not(#add_player)").removeClass("disabled");
 				
 				// Get current box
 				var active = $(".active");
@@ -449,8 +467,10 @@
 			<thead>
 				<tr>
 					<td>
-						<div class="left_corner">Players</div>
-						<div class="right_corner">Frames</div>
+						<div>
+							<div class="left_corner">Players</div>
+							<div class="right_corner">Frames</div>
+						</div>
 					</td>
 					<th>1</th>
 					<th>2</th>
