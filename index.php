@@ -156,7 +156,12 @@
 					
 					// If this is our initial first player
 					if (first) {
-						$("tbody tr:first .player").text($(".modal input").val());
+						var name = $(".modal input").val();
+						
+						// If the name is empty, use a default
+						if (name == "") name = "Player 1";
+						
+						$("tbody tr:first .player").text(name);
 						first = false;
 					} else {
 						// Maximum of 6 players
@@ -201,15 +206,16 @@
 							// if it's not the last frame, select the next frame in the first row
 							if (col < 11) {
 								$("tbody tr:first-child td:nth-child("+(col + 1)+") .score_1").addClass('active');
+								row.removeClass('current');
 								$("tbody tr:first-child").addClass('current');
 							}
 						// Otherwise, select the next row
 						} else {
+							row.removeClass('current');
+							
 							row.next().addClass('current');
 							$("td:nth-child("+col+") .score_1", row.next()).addClass('active');
 						}
-						
-						row.removeClass('current');
 					// Otherwise, just get the second score
 					} else {
 						if (active[0] != last_score[0]) {
@@ -387,6 +393,11 @@
 					clone.removeClass("template").removeClass('current');
 					clone.attr("id", "row_"+$("tbody tr").length);
 					
+					// If the name is empty, use a default
+					if (name == "") {
+						name = "Player " + ($("tbody tr").length + 1);
+					}
+					
 					// Change the text
 					$(".player", clone).text(name);
 					
@@ -489,9 +500,9 @@
 					<td class="player">Player 1</td>
 					<? for ($i = 0; $i < 10; $i++) { ?>
 					<td class="score col_<?=$i?>">
-						<div class="score_1<?=$i == 0 ? ' active' : ''?>"><span>0</span></div>
-						<div class="score_2"><span>0</span></div>
-						<?=$i == 9 ? '<div class="score_3"><span>0</span></div>' : '' ?>
+						<div class="score_1<?=$i == 0 ? ' active' : ''?>"><span>&ndash;</span></div>
+						<div class="score_2"><span>&ndash;</span></div>
+						<?=$i == 9 ? '<div class="score_3"><span>&ndash;</span></div>' : '' ?>
 						<div class="score_tot"><span>0</span></div>
 					</td>
 					<? } ?>
