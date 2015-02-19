@@ -119,6 +119,7 @@
 		<script type="text/javascript">
 			// Stores the most recent score field for making changes
 			var last_score;
+			var first = true;
 			
 			$(function() {
 				// Add player button functionality
@@ -127,24 +128,34 @@
 					if ($("tbody tr").length >= 6) {
 						return false;
 					}
-					
+					$(".modal input").val("");
 					$(".modal").modal('show');
 				});
 				
 				// Modal add button functionality
-				$("#modal_add").click(function() {
+				$("#modal_form").submit(function(e) {
+					e.preventDefault();
+					
 					$(".modal").modal("hide");
 					
-					// Maximum of 6 players
-					if ($("tbody tr").length >= 6) {
-						return false;
+					// If this is our initial first player
+					if (first) {
+						$("tbody tr:first .player").text($(".modal input").val());
+						first = false;
+					} else {
+						// Maximum of 6 players
+						if ($("tbody tr").length >= 6) {
+							return false;
+						}
+						
+						addPlayer($(".modal input").val());
 					}
 					
-					addPlayer($(".modal input").val());
+					return false;
 				})
 				
 				// Score button functionality
-				$(".btn:not(#add_player)").click(function() {
+				$("#buttons .btn:not(#add_player)").click(function() {
 					// Get the current score from the button and update the box
 					var score = $(this).text();
 					$(".current .score .active span").text(score);
@@ -160,7 +171,7 @@
 						row.removeClass('current');
 						last_score.closest('tr').addClass('current');
 					// If it's the last frame and they get a strike or spare
-					} else if (active.hasClass('score_2') && (score == "X" || score == "/") && col == 11) {
+					} else if (active.hasClass('score_2') && col == 11 && (score == "X" || score == "/" || $(".score_1", active.parent()).text() == "X")) {
 						$(".score_3", active.parent()).addClass('active');
 					// If we're moving to the next frame
 					} else if (active.hasClass('score_2') || active.hasClass('score_3') || (score == "X" && col < 11)) {
@@ -185,12 +196,17 @@
 						row.removeClass('current');
 					// Otherwise, just get the second score
 					} else {
+						if (active[0] != last_score[0]) {
+							$(".score_2 span", active.parent()).text("0");
+						}
 						$(".score_2", active.parent()).addClass('active');
 					}
 					
 					// Clear the current selection and update the 'counter'
 					active.removeClass("active");
 					if (active[0] == last_score[0]) last_score = $(".active");
+					
+					$("#add_player").addClass('disabled');
 					
 					// Update the scores
 					calcScore();
@@ -199,11 +215,17 @@
 				});
 				
 				// When clicking a box, it should become selected
-				$(".score_1, .score_2").click(function() {
+				$(".score_1, .score_2, .score_3").click(function() {
+					// Unselect current box
 					$(".active").removeClass('active');
 					$(".current").removeClass('current');
+					
+					// Select new box
 					$(this).addClass('active');
 					$(this).closest("tr").addClass('current');
+					
+					// Update the buttons
+					updateButtons();
 				});
 				
 				// Bootstrap modal autofocus
@@ -214,6 +236,8 @@
 				// Initialise the score box 'counter'
 				last_score = $(".active");
 				updateButtons();
+				
+				$(".modal").modal("show");
 			});
 			
 			// Function to update player scores
@@ -337,56 +361,83 @@
 			
 			// Function to add a new player row
 			function addPlayer(name) {
-				// Clone the template
-				var clone = $(".template").clone();
+				// If we have fewer than 6 players
+				if ($("tbody tr").length < 6) {
+					// Clone the template
+					var clone = $(".template").clone();
+					
+					// Update the class and id
+					clone.removeClass("template").removeClass('current');
+					clone.attr("id", "row_"+$("tbody tr").length);
+					
+					// Change the text
+					$(".player", clone).text(name);
+					
+					// Remove any active classes
+					$(".active", clone).removeClass('active');
+					
+					// Append to table
+					$("tbody").append(clone);
+				}
 				
-				// Update the class and id
-				clone.removeClass("template").removeClass('current');
-				clone.attr("id", "row_"+$("tbody tr").length);
-				
-				// Change the text
-				$(".player", clone).text(name);
-				
-				// Append to table
-				$("tbody").append(clone);
+				if ($("tbody tr").length >= 6) {
+					// If we have more than 6 players now disable the add button
+					$("#add_player").addClass('disabled');
+				}
 			}
 			
 			function updateButtons() {
-				$(".btn").removeClass("disabled");
+				// Enable all buttons to start
+				$("#buttons .btn:not(#add_button)").removeClass("disabled");
 				
+				// Get current box
 				var active = $(".active");
 				
-				if (active.hasClass('score_1')) {
+				// If we've finished, disable all
+				if (active.length == 0) {
+					$(".btn").addClass('disabled');
+				// If it's the first score, disable the spare button
+				} else if (active.hasClass('score_1')) {
 					$("#btn_S").addClass("disabled");
+				// If it's the second score
 				} else if (active.hasClass('score_2')) {
-					console.log(active.parent().index());
-					if (active.parent().index() != 10) {
-						$("#btn_X").addClass("disabled");
-					}
-					
+					// Get the previous score
 					var score = $(".score_1", active.parent()).text();
+					
+					// If it was a strike or spare
 					if (score == "X" || score == "/") {
+						// Disable the spare button
 						$("#btn_S").addClass("disabled");
 					} else {
+						// Otherwise disable a strike
+						$("#btn_X").addClass("disabled");
+						
+						// Check if it's a 0 score
 						if (score == "\u2013") score = 0;
 						if (score == "\xa0") score = 0;
 						if (score == "") score = 0;
 						
+						// Disable all too-high valued options
 						for (var x = 9; x > (9 - score); x--) {
 							$("#btn_"+x).addClass("disabled");
 						}
 					}
+				// The third score on the final frame
 				} else {
+					// Get the previous score
 					var score = $(".score_2", active.parent()).text();
+					
+					// If it was a strike or spare
 					if (score == "X" || score == "/") {
+						// Disable the spare button
 						$("#btn_S").addClass('disabled');
 					} else {
+						// Otherwise, disable the strike
 						$("#btn_X").addClass('disabled');
 						
-						if (score != "/") {
-							for (var x = 9; x > (9 - score); x--) {
-								$("#btn_"+x).addClass("disabled");
-							}
+						// Disable all too-high valued options
+						for (var x = 9; x > (9 - score); x--) {
+							$("#btn_"+x).addClass("disabled");
 						}
 					}
 				}
@@ -425,21 +476,10 @@
 					</td>
 					<? } ?>
 				</tr>
-				<tr class="" id="row_1">
-					<td class="player">Player 2</td>
-					<? for ($i = 0; $i < 10; $i++) { ?>
-					<td class="score col_<?=$i?>">
-						<div class="score_1"><span>0</span></div>
-						<div class="score_2"><span>0</span></div>
-						<?=$i == 9 ? '<div class="score_3"><span>0</span></div>' : '' ?>
-						<div class="score_tot"><span>0</span></div>
-					</td>
-					<? } ?>
-				</tr>
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="11" class="text-center">
+					<td colspan="11" class="text-center" id="buttons">
 						<div class="btn btn-primary btn-lg" id="btn_D">&ndash;</div>
 						<div class="btn btn-primary btn-lg" id="btn_1">1</div>
 						<div class="btn btn-primary btn-lg" id="btn_2">2</div>
@@ -460,17 +500,19 @@
 		<div class="modal fade">
 			<div class="modal-dialog">
 				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title">Add Player</h4>
-					</div>
-					<div class="modal-body">
-						<input type="text" name="name" class="form-control" placeholder="Player Name" />
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-						<button type="button" class="btn btn-primary" id="modal_add">Add Player</button>
-					</div>
+					<form id="modal_form">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">Add Player</h4>
+						</div>
+						<div class="modal-body">
+							<input type="text" name="name" class="form-control" placeholder="Player Name" />
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Add Player</button>
+						</div>
+					</form>
 				</div><!-- /.modal-content -->
 			</div><!-- /.modal-dialog -->
 		</div><!-- /.modal -->
