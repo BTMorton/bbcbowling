@@ -88,7 +88,19 @@
 			}
 			tr.current, tr.current td {
 				height: 15%;
-				background-color: #D9EDF7;
+				background-color: #337ab7;
+				color: #FFFFFF;
+				text-shadow: 0 -1px 0 rgba(0,0,0,.2);
+				-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
+				box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
+				background-image: -webkit-linear-gradient(top,#337ab7 0,#265a88 100%);
+				background-image: -o-linear-gradient(top,#337ab7 0,#265a88 100%);
+				background-image: -webkit-gradient(linear,left top,left bottom,from(#337ab7),to(#265a88));
+				background-image: linear-gradient(to bottom,#337ab7 0,#265a88 100%);
+				filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff337ab7', endColorstr='#ff265a88', GradientType=0);
+				filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+				background-repeat: repeat-x;
+				border-color: #245580;
 			}
 			.table > tbody > tr > td.score {
 				padding: 0;
