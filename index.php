@@ -190,7 +190,7 @@
 					
 					// Clear the current selection and update the 'counter'
 					active.removeClass("active");
-					last_score = $(".active");
+					if (active[0] == last_score[0]) last_score = $(".active");
 					
 					// Update the scores
 					calcScore();
