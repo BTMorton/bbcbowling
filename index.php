@@ -111,22 +111,105 @@
 			}
 		</style>
 		<script type="text/javascript">
+			// Stores the most recent score field for making changes
+			var last_score;
+			
 			$(function() {
+				// Add player button functionality
 				$("#add_player").click(function() {
+					// Maximum of 6 players
 					if ($("tbody tr").length >= 6) {
 						return false;
 					}
-					addPlayer("Player "+($("tbody tr").length+1));
-				});
-				$(".btn:not(#add_player)").click(function() {
 					
+					$(".modal").modal('show');
+				});
+				
+				// Modal add button functionality
+				$("#modal_add").click(function() {
+					$(".modal").modal("hide");
+					
+					// Maximum of 6 players
+					if ($("tbody tr").length >= 6) {
+						return false;
+					}
+					
+					addPlayer($(".modal input").val());
 				})
+				
+				// Score button functionality
+				$(".btn:not(#add_player)").click(function() {
+					$(".current .score .active span").text($(this).text());
+					var active = $(".current .score .active");
+					var row = $(".current");
+					var col = active.parent("td").index() + 1;
+					
+					if (active.attr("id") != last_score.attr("id")) {
+						last_score.addClass('active');
+						row.removeClass('current');
+						last_score.closest('tr').addClass('current');
+					} else if (active.hasClass('score_2')) {
+						if (row.is(":last-child")) {
+							if (col < 11) {
+								$("tbody tr:first-child td:nth-child("+(col + 1)+") .score_1").addClass('active');
+								$("tbody tr:first-child").addClass('current');
+							}
+						} else {
+							row.next().addClass('current');
+							$("td:nth-child("+col+") .score_1", row.next()).addClass('active');
+						}
+						
+						row.removeClass('current');
+					} else {
+						$(".score_2", active.parent()).addClass('active');
+					}
+					
+					active.removeClass("active");
+					
+					calcScore();
+				});
+				
+				$(".score_1, .score_2").click(function() {
+					$(".active").removeClass('active');
+					$(".current").removeClass('current');
+					$(this).addClass('active');
+					$(this).closest("tr").addClass('current');
+				});
+				
+				// Initialise bootstrap modal
+				$(".modal").on("shown.bs.modal", function() {
+					$(".modal input").focus();
+				});
+				
+				last_score = $(".active");
 			});
+			
+			// Function to update player scores
+			function calcScore() {
+				$("tbody tr").each(function() {
+					var score = 0;
+					
+					$("td.score", this).each(function() {
+						score += parseInt($(".score_1", this).text());
+						score += parseInt($(".score_2", this).text());
+						$(".score_tot span", this).text(score);
+					});
+				});
+			}
+			
+			// Function to add a new player row
 			function addPlayer(name) {
+				// Clone the template
 				var clone = $(".template").clone();
-				clone.removeClass("template");
+				
+				// Update the class and id
+				clone.removeClass("template").removeClass('current');
 				clone.attr("id", "row_"+$("tbody tr").length);
+				
+				// Change the text
 				$(".player", clone).text(name);
+				
+				// Append to table
 				$("tbody").append(clone);
 			}
 		</script>
@@ -152,17 +235,17 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr class="template" id="row_0">
+				<tr class="template current" id="row_0">
 					<td class="player">Player 1</td>
 					<? for ($i = 0; $i < 10; $i++) { ?>
 					<td class="score" id="score_0_<?=$i?>">
-						<div class="score_1"><span>0</span></div>
+						<div class="score_1<?=$i == 0 ? ' active' : ''?>"><span>0</span></div>
 						<div class="score_2"><span>0</span></div>
 						<div class="score_tot"><span>0</span></div>
 					</td>
 					<? } ?>
 				</tr>
-				<tr class="current" id="row_1">
+				<tr class="" id="row_1">
 					<td class="player">Player 2</td>
 					<? for ($i = 0; $i < 10; $i++) { ?>
 					<td class="score" id="score_1_<?=$i?>">
@@ -193,5 +276,22 @@
 				</tr>
 			</tfoot>
 		</table>
+		<div class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title">Add Player</h4>
+					</div>
+					<div class="modal-body">
+						<input type="text" name="name" class="form-control" placeholder="Player Name" />
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-primary" id="modal_add">Add Player</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
 	</body>
 </html>
