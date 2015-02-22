@@ -293,7 +293,7 @@
 							}
 						});
 						
-						$("#win_modal .modal-body").text("Congratulations "+winner+"! You have won the game with a total score of "+max_score);
+						$("#win_modal .modal-body .win").text("Congratulations "+winner+"! You have won the game with a total score of "+max_score);
 						
 						$("#win_modal").modal("show");
 					}
@@ -490,7 +490,7 @@
 				
 				// If we've finished, disable all
 				if (active.length == 0) {
-					$("#buttons .btn").addClass('disabled');
+					$("#buttons .btn:not(#print)").addClass('disabled');
 				// If it's the first score, disable the spare button
 				} else if (active.hasClass('score_1')) {
 					$("#btn_S").addClass("disabled");
@@ -623,7 +623,8 @@
 							<h4 class="modal-title">Game Over</h4>
 						</div>
 						<div class="modal-body">
-							
+							<span class="win"></span><br /><br />
+							To start a new game, refresh the page.
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
