@@ -188,19 +188,19 @@
 					}
 					
 					// Show the modal box
-					$(".modal input").val("");
-					$(".modal").modal('show');
+					$("#player_modal input").val("");
+					$("#player_modal").modal('show');
 				});
 				
 				// Modal add button functionality
 				$("#modal_form").submit(function(e) {
 					e.preventDefault();
 					
-					$(".modal").modal("hide");
+					$("#player_modal").modal("hide");
 					
 					// If this is our initial first player
 					if (first) {
-						var name = $(".modal input").val();
+						var name = $("#player_modal input").val();
 						
 						// If the name is empty, use a default
 						if (name == "") name = "Player 1";
@@ -213,7 +213,7 @@
 							return false;
 						}
 						
-						addPlayer($(".modal input").val());
+						addPlayer($("#player_modal input").val());
 					}
 					
 					return false;
@@ -247,10 +247,11 @@
 						
 						// If it's the last player
 						if (row.is(":last-child")) {
+							row.removeClass('current');
+							
 							// if it's not the last frame, select the next frame in the first row
 							if (col < 11) {
 								$("tbody tr:first-child td:nth-child("+(col + 1)+") .score_1").addClass('active');
-								row.removeClass('current');
 								$("tbody tr:first-child").addClass('current');
 							}
 						// Otherwise, select the next row
@@ -279,6 +280,23 @@
 					updateButtons();
 					// We don't want to add any more players once play has begun
 					$("#add_player").addClass('disabled');
+					
+					if (col == 11 && $(".active").length == 0) {
+						var winner = "", max_score = 0;
+						
+						$("tbody tr").each(function() {
+							var score = parseInt($(".col_9 .score_tot", this).text());
+							
+							if (score > max_score) {
+								winner = $(".player", this).text();
+								max_score = score;
+							}
+						});
+						
+						$("#win_modal .modal-body").text("Congratulations "+winner+"! You have won the game with a total score of "+max_score);
+						
+						$("#win_modal").modal("show");
+					}
 				});
 				
 				// When clicking a box, it should become selected
@@ -296,8 +314,8 @@
 				});
 				
 				// Bootstrap modal autofocus
-				$(".modal").on("shown.bs.modal", function() {
-					$(".modal input").focus();
+				$("#player_modal").on("shown.bs.modal", function() {
+					$("#player_modal input").focus();
 				});
 				
 				$("#print").click(function() {
@@ -308,7 +326,7 @@
 				last_score = $(".active");
 				updateButtons();
 				
-				$(".modal").modal("show");
+				$("#player_modal").modal("show");
 			});
 			
 			// Function to update player scores
@@ -472,7 +490,7 @@
 				
 				// If we've finished, disable all
 				if (active.length == 0) {
-					$(".btn").addClass('disabled');
+					$("#buttons .btn").addClass('disabled');
 				// If it's the first score, disable the spare button
 				} else if (active.hasClass('score_1')) {
 					$("#btn_S").addClass("disabled");
@@ -577,7 +595,7 @@
 				</tr>
 			</tfoot>
 		</table>
-		<div class="modal fade">
+		<div class="modal fade" id="player_modal">
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<form id="modal_form">
@@ -591,6 +609,24 @@
 						<div class="modal-footer">
 							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 							<button type="submit" class="btn btn-primary">Add Player</button>
+						</div>
+					</form>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+		<div class="modal fade" id="win_modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<form id="modal_form">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title">Game Over</h4>
+						</div>
+						<div class="modal-body">
+							
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 						</div>
 					</form>
 				</div><!-- /.modal-content -->
